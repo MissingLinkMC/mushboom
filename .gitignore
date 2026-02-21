@@ -1,0 +1,12 @@
+__pycache__/
+
+networks.json
+src/config_local.py
+wipe.py
+typings
+alt-src
+.venv/
+venv/
+.vscode/
+.claude/
+.specify/

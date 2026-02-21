@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MushBoom Log Files</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <style>
+    body { font-family: Arial, sans-serif; background: #f6f8fa; color: #222; margin: 0; padding: 0; }
+    .container { max-width: 800px; margin: 60px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 32px 24px; }
+    h1 { text-align: center; margin-bottom: 10px; }
+    .navbar { margin-bottom: 20px; text-align: center; }
+    .navbar a { margin-right: 15px; text-decoration: none; color: #3498db; font-weight: bold; }
+    .navbar a:hover { text-decoration: underline; }
+    ul { list-style: none; padding: 0; }
+    li { margin: 18px 0; padding: 12px; background: #f2f2f2; border-radius: 6px; }
+    a { color: #1976d2; text-decoration: none; font-weight: bold; }
+    a:hover { text-decoration: underline; }
+    .back-link { display: block; margin-top: 32px; text-align: center; }
+    pre {
+      background: #f8f8f8;
+      border-radius: 4px;
+      padding: 16px;
+      overflow-x: auto;
+      max-height: 500px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .log-section {
+      margin-bottom: 40px;
+    }
+    .refresh-controls {
+      background: #f2f7fb;
+      border: 1px solid #d1e4f5;
+      border-radius: 6px;
+      padding: 12px;
+      margin: 20px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .refresh-btn {
+      background: #2980b9;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.2s ease;
+    }
+    .refresh-btn:hover {
+      background: #1c5d8c;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="navbar">
+      <a href="/">Home</a>
+      <a href="/memory.html">Memory Monitor</a>
+      <a href="/logs.html">Logs</a>
+    </div>
+    <h1>Log Files</h1>
+
+    <!-- Refresh Controls -->
+    <div class="refresh-controls">
+      <button class="refresh-btn" onclick="refreshLogs()">Refresh Now</button>
+    </div>
+
+    <a class="back-link" href="/" style="margin-top: 0; margin-bottom: 20px;">&larr; Back to Status</a>
+
+    <!-- Application log -->
+    <div class="log-section">
+      <h2>Application Log</h2>
+      <pre id="app-log">Loading...</pre>
+    </div>
+
+    <!-- Error log -->
+    <div class="log-section">
+      <h2>Error Log</h2>
+      <pre id="error-log">Loading...</pre>
+    </div>
+  </div>
+
+  <script>
+    // Function to fetch and display logs
+    async function fetchLogs() {
+      try {
+        // Fetch application log
+        const appLogResponse = await fetch('/api/logs/app');
+        if (appLogResponse.ok) {
+          const appLogData = await appLogResponse.text();
+          // Reverse the log lines to show newest at the top
+          const reversedAppLog = appLogData ? appLogData.split('\n').reverse().join('\n') : 'No log entries';
+          document.getElementById('app-log').textContent = reversedAppLog;
+        } else {
+          document.getElementById('app-log').textContent = 'Failed to load log';
+        }
+
+        // Fetch error log
+        const errorLogResponse = await fetch('/api/logs/error');
+        if (errorLogResponse.ok) {
+          const errorLogData = await errorLogResponse.text();
+          // Reverse the log lines to show newest at the top
+          const reversedErrorLog = errorLogData ? errorLogData.split('\n').reverse().join('\n') : 'No log entries';
+          document.getElementById('error-log').textContent = reversedErrorLog;
+        } else {
+          document.getElementById('error-log').textContent = 'Failed to load log';
+        }
+      } catch (error) {
+        console.error('Error fetching logs:', error);
+      }
+    }
+
+    // Function to refresh logs
+    function refreshLogs() {
+      document.getElementById('app-log').textContent = 'Loading...';
+      document.getElementById('error-log').textContent = 'Loading...';
+      fetchLogs();
+    }
+
+    // Fetch logs when page loads
+    fetchLogs();
+  </script>
+</body>
+</html>

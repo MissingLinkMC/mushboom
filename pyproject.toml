@@ -1,0 +1,36 @@
+[project]
+name = "mushboom"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "black>=25.1.0",
+    "micropython-esp32-esp32_generic_s3-stubs>=1.26.0.post1",
+    "mpremote>=1.25.0",
+    "pyright>=1.1.401",
+    "pytest>=8.3.5",
+    "ruff>=0.11.11",
+    "ujson>=5.10.0",
+]
+
+[project.optional-dependencies]
+# install to folder typings
+# uv pip install -r pyproject.toml --extra stubs --target typings
+stubs = [
+  "micropython-esp32-stubs"
+]
+
+[tool.pyright]
+include = ["src"]
+ignore = ["**/typings"]
+exclude = [".*", "__*", "**/typings", "src/vendor/*"]
+
+typeCheckingMode = "basic"
+stubPath = "typings"
+typeshedPath = "typings"
+pythonPlatform = "Linux"
+pythonVersion = "3.8"
+
+reportMissingModuleSource = "none"
+reportUnnecessaryTypeIgnoreComment = "information"
