@@ -221,7 +221,10 @@
   </div><!-- /page -->
 
   <script>
-  const USE_FAHRENHEIT = JSON.parse("{{USE_FAHRENHEIT}}".toLowerCase());
+  const USE_FAHRENHEIT = (() => {
+    try { return JSON.parse("{{USE_FAHRENHEIT}}".toLowerCase()); }
+    catch (e) { return false; }
+  })();
 
   function cToF(c) { return c === null || c === undefined ? c : (c * 9/5) + 32; }
   function fToC(f) { return (f - 32) * 5 / 9; }
@@ -388,6 +391,7 @@
   }
 
   async function refresh() {
+  try {
     const [metrics, ranges] = await Promise.all([fetchMetrics(), fetchRanges()]);
 
     const unit = USE_FAHRENHEIT ? '°F' : '°C';
@@ -415,9 +419,9 @@
 
     // Device status
     const deviceMap = [
-      { id: 'heater-device',    svgId: 'heater-svg',    on: metrics.heater_on },
-      { id: 'fan-device',       svgId: 'fan-svg',       on: metrics.fan_on },
-      { id: 'humidifier-device',svgId: 'humidifier-svg',on: metrics.humidifier_on },
+      { id: 'heater-device', on: metrics.heater_on },
+      { id: 'fan-device',    on: metrics.fan_on },
+      { id: 'humidifier-device', on: metrics.humidifier_on },
     ];
     deviceMap.forEach(({ id, on }) => {
       const card = document.getElementById(id);
@@ -429,20 +433,25 @@
 
     document.getElementById('timestamp').textContent = 'Last update: ' + new Date().toLocaleString();
     setThresholdInputs(ranges);
+  } catch (err) {
+    document.getElementById('timestamp').textContent = 'Update failed — retrying…';
   }
+}
 
   // Form handlers
   document.getElementById('range-form').addEventListener('submit', async e => {
     e.preventDefault();
-    let tempOn  = parseFloat(document.getElementById('temp-on').value);
-    let tempOff = parseFloat(document.getElementById('temp-off').value);
-    if (USE_FAHRENHEIT) { tempOn = fToC(tempOn); tempOff = fToC(tempOff); }
-    await updateRanges({
-      co2:  { on: parseFloat(document.getElementById('co2-on').value),  off: parseFloat(document.getElementById('co2-off').value) },
-      temp: { on: tempOn, off: tempOff },
-      rh:   { on: parseFloat(document.getElementById('rh-on').value),   off: parseFloat(document.getElementById('rh-off').value) },
-    });
-    await loadThresholdInputs();
+    try {
+      let tempOn  = parseFloat(document.getElementById('temp-on').value);
+      let tempOff = parseFloat(document.getElementById('temp-off').value);
+      if (USE_FAHRENHEIT) { tempOn = fToC(tempOn); tempOff = fToC(tempOff); }
+      await updateRanges({
+        co2:  { on: parseFloat(document.getElementById('co2-on').value),  off: parseFloat(document.getElementById('co2-off').value) },
+        temp: { on: tempOn, off: tempOff },
+        rh:   { on: parseFloat(document.getElementById('rh-on').value),   off: parseFloat(document.getElementById('rh-off').value) },
+      });
+      await loadThresholdInputs();
+    } catch (err) {}
   });
 
   document.getElementById('fan-schedule-enabled').addEventListener('change', e => {
@@ -454,14 +463,16 @@
 
   document.getElementById('fan-schedule-form').addEventListener('submit', async e => {
     e.preventDefault();
-    const enabled  = document.getElementById('fan-schedule-enabled').checked;
-    const duration = parseFloat(document.getElementById('fan-schedule-duration').value);
-    const interval = parseFloat(document.getElementById('fan-schedule-interval').value);
-    const payload  = { enabled };
-    if (!Number.isNaN(duration)) payload.duration_minutes = duration;
-    if (!Number.isNaN(interval)) payload.interval_minutes = interval;
-    await updateFanSchedule(payload);
-    await loadFanScheduleForm();
+    try {
+      const enabled  = document.getElementById('fan-schedule-enabled').checked;
+      const duration = parseInt(document.getElementById('fan-schedule-duration').value, 10);
+      const interval = parseInt(document.getElementById('fan-schedule-interval').value, 10);
+      const payload  = { enabled };
+      if (!Number.isNaN(duration)) payload.duration_minutes = duration;
+      if (!Number.isNaN(interval)) payload.interval_minutes = interval;
+      await updateFanSchedule(payload);
+      await loadFanScheduleForm();
+    } catch (err) {}
   });
 
   function setupModeToggles() {
