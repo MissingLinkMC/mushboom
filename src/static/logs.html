@@ -45,7 +45,7 @@
         if (appRes.ok) {
           const data = await appRes.text();
           document.getElementById('app-log').textContent =
-            data ? data.split('\n').reverse().join('\n') : 'No log entries';
+            data ? data.split('\n').filter(l => l).reverse().join('\n') : 'No log entries';
         } else {
           document.getElementById('app-log').textContent = 'Failed to load log';
         }
@@ -53,11 +53,13 @@
         if (errRes.ok) {
           const data = await errRes.text();
           document.getElementById('error-log').textContent =
-            data ? data.split('\n').reverse().join('\n') : 'No log entries';
+            data ? data.split('\n').filter(l => l).reverse().join('\n') : 'No log entries';
         } else {
           document.getElementById('error-log').textContent = 'Failed to load log';
         }
       } catch (e) {
+        document.getElementById('app-log').textContent = 'Failed to load log';
+        document.getElementById('error-log').textContent = 'Failed to load log';
         console.error('Error fetching logs:', e);
       }
     }
