@@ -97,7 +97,10 @@
 
           document.getElementById('last-update').textContent = new Date().toLocaleString();
         })
-        .catch(e => console.error('Error fetching memory data:', e));
+        .catch(e => {
+          document.getElementById('last-update').textContent = 'Error — retrying...';
+          console.error('Error fetching memory data:', e);
+        });
     }
 
     document.addEventListener('DOMContentLoaded', fetchData);
