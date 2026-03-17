@@ -60,6 +60,73 @@ The system is built around `uasyncio` coroutines. `main.py` initializes WiFi, st
 - Vendor dependencies (`microdot.py`, `wifi_manager.py`, sensor drivers) live in `src/vendor/` and should not be edited.
 - Control modes per device: `auto` (threshold-based), `on` (always on), `off` (always off).
 
+## Hardware Testing
+
+The board communicates over **USB** (via `mpremote`) for file upload, REPL access, and log tailing, and over **WiFi/HTTP** for dashboard interaction, API calls, and mock data injection.
+
+### Configuration
+
+In `src/config_local.py`:
+```python
+DEBUG_MODE = True  # disables real sensor/relay hardware
+```
+
+In your shell (find IP after boot with `make repl` → `import network; print(network.WLAN().ifconfig())`):
+```sh
+export DEVICE_IP=192.168.x.x
+```
+
+### Commands
+
+| Action | Command |
+|--------|---------|
+| Upload files | `make flash` |
+| Soft-reset board | `make restart` |
+| Open REPL | `make repl` |
+| Tail logs (USB) | `make logs` (Ctrl-C to stop; stop before `make restart`) |
+| Read state | `curl http://$DEVICE_IP/api/metrics` |
+| Open dashboard | `open http://$DEVICE_IP/` |
+
+### Injecting mock sensor values (DEBUG_MODE only)
+
+```sh
+# Inject values — control loop reacts within 5s
+curl -X PUT http://$DEVICE_IP/api/debug/state \
+  -H 'Content-Type: application/json' \
+  -d '{"temperature": 17.0, "co2": 1200, "relative_humidity": 85}'
+
+# Read relay decisions
+curl http://$DEVICE_IP/api/metrics
+# → {"heater_on": true, "fan_on": true, "humidifier_on": true, ...}
+
+# Clear mocks — heater turns OFF (safety fallback) until re-injected
+curl -X DELETE http://$DEVICE_IP/api/debug/state
+```
+
+### Setting config via API
+
+```sh
+# Set thresholds
+curl -X PUT http://$DEVICE_IP/api/ranges \
+  -H 'Content-Type: application/json' \
+  -d '{"temp": {"on": 18, "off": 22}, "co2": {"on": 900, "off": 700}}'
+
+# Set device modes (auto | on | off)
+curl -X PUT http://$DEVICE_IP/api/modes \
+  -H 'Content-Type: application/json' \
+  -d '{"fan": "on"}'
+```
+
+### Full deploy cycle
+
+```sh
+make flash && make restart
+# Wait ~5s for boot, then:
+make logs   # in a separate terminal
+```
+
+> **Note:** `make logs` and `make restart` both open the USB serial port. Stop `make logs` (Ctrl-C) before running `make restart`.
+
 ## Web UI Notes
 
 - **Shared stylesheet**: `src/static/style.css` holds the earthy dark theme. All CSS variables are defined in `:root`. Do not inline styles or duplicate color values in individual HTML files.
