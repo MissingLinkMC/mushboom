@@ -80,7 +80,6 @@ h1, h2, h3 {
   font-weight: 700;
   font-size: 1em;
   letter-spacing: 1px;
-  text-decoration: none;
 }
 
 .navbar-brand:hover {
@@ -239,7 +238,7 @@ h1, h2, h3 {
   overflow: hidden;
 }
 
-.device.active #heater-svg { color: #e74c3c; }
+.device.active #heater-svg { color: var(--red); }
 .device.active #fan-svg    { color: var(--green); }
 .device.active #humidifier-svg { color: var(--blue); }
 
