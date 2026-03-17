@@ -63,6 +63,11 @@ async def site_manifest(request):
     return send_file("/static/site.webmanifest")
 
 
+@app.get("/style.css")
+async def stylesheet(request):
+    return send_file("/static/style.css", content_type="text/css")
+
+
 @app.get("/logs.html")
 async def logs_page(request):
     return send_file("/static/logs.html")
