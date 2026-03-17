@@ -6,6 +6,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 MushBoom is a MicroPython application for ESP32 that controls environmental conditions for mushroom cultivation. It monitors temperature, humidity, and CO2 via I2C sensors and controls GPIO relays for a heater, fan, and humidifier. A Microdot web server exposes a REST API and dashboard.
 
+## Git Workflow
+
+- Always work on a feature branch — never commit directly to `main`
+- Never merge feature branches to `main` locally — always push and open a Pull Request
+
 ## Commands
 
 ```bash
