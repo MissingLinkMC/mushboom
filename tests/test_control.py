@@ -14,9 +14,22 @@ class AsyncioMock:
 
 sys.modules['uasyncio'] = AsyncioMock()
 
+# Mock lib.logger
+mock_logger = types.SimpleNamespace(
+    debug=lambda *a, **k: None,
+    info=lambda *a, **k: None,
+    warning=lambda *a, **k: None,
+    error=lambda *a, **k: None,
+)
+sys.modules['lib'] = types.ModuleType('lib')
+sys.modules['lib.logger'] = types.SimpleNamespace(get_logger=lambda name: mock_logger)
+
 # Mock shared_state module
 mock_state = types.SimpleNamespace(
     temperature=None,
+    temperature_1=None,
+    temperature_2=None,
+    temperature_3=None,
     heater_on=False,
     co2=None,
     fan_on=False,
@@ -32,7 +45,10 @@ mock_config = types.SimpleNamespace(
     off_humidity=80,
     heater_mode="auto",
     fan_mode="auto",
-    humidifier_mode="auto"
+    humidifier_mode="auto",
+    fan_schedule_enabled=False,
+    fan_schedule_interval_minutes=60,
+    fan_schedule_duration_minutes=5,
 )
 
 sys.modules["shared_state"] = types.SimpleNamespace(
@@ -45,6 +61,9 @@ control = importlib.import_module("src.tasks.control_loop")
 class TestControlLogic(unittest.TestCase):
     def setUp(self):
         mock_state.temperature = None
+        mock_state.temperature_1 = None
+        mock_state.temperature_2 = None
+        mock_state.temperature_3 = None
         mock_state.heater_on = False
         mock_state.co2 = None
         mock_state.fan_on = False

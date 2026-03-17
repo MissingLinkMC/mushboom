@@ -59,3 +59,10 @@ The system is built around `uasyncio` coroutines. `main.py` initializes WiFi, st
 - `networks.json` (gitignored) holds WiFi credentials; copy from `networks.example.json`.
 - Vendor dependencies (`microdot.py`, `wifi_manager.py`, sensor drivers) live in `src/vendor/` and should not be edited.
 - Control modes per device: `auto` (threshold-based), `on` (always on), `off` (always off).
+
+## Web UI Notes
+
+- **Shared stylesheet**: `src/static/style.css` holds the earthy dark theme. All CSS variables are defined in `:root`. Do not inline styles or duplicate color values in individual HTML files.
+- **Template substitution scope**: `render_template` is only applied to `index.html`. `logs.html` and `memory.html` are served via `send_file()` with no template processing — do not add `{{...}}` variables to those pages.
+- **`send_file()` requires explicit `content_type=`**: Microdot does not infer MIME type from file extension. Always pass e.g. `content_type="text/css"` when serving non-HTML files.
+- **Device icon state coupling**: The dashboard JS uses `classList.toggle('active', device.on)` to reflect relay state. CSS device icon color rules must target `.device.active #heater-svg`, `.device.active #fan-svg`, `.device.active #humidifier-svg`. Do not rename these IDs or the `active` class.
