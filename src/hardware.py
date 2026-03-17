@@ -123,10 +123,10 @@ class RealRelayDriver:
 
 
 def get_sensor_driver():
-    from config import DEBUG_MODE
-    return StubSensorDriver() if DEBUG_MODE else RealSensorDriver()
+    import config
+    return StubSensorDriver() if config.DEBUG_MODE else RealSensorDriver()
 
 
 def get_relay_driver():
-    from config import DEBUG_MODE
-    return StubRelayDriver() if DEBUG_MODE else RealRelayDriver()
+    import config
+    return StubRelayDriver() if config.DEBUG_MODE else RealRelayDriver()
