@@ -245,11 +245,6 @@ async def set_fan_schedule(request):
         )
 
 
-@app.get("/logs.html")
-async def logs_html(request):
-    return send_file("/static/logs.html")
-
-
 @app.get("/logs/error.log")
 async def serve_error_log(request):
     # Use path relative to current directory
