@@ -10,7 +10,7 @@ NETWORKS_FILE := networks.json
 ASSET_FILES := $(shell find $(SRC_DIR)/static -type f -not -name "*.py" -not -name "*.html")
 FILES := $(PY_FILES) $(HTML_FILES) $(ASSET_FILES)
 
-.PHONY: all sync lint format typecheck test flash clean
+.PHONY: all sync lint format typecheck test flash flash-clean clean repl logs restart
 
 all: lint format typecheck test
 
@@ -41,6 +41,7 @@ flash: $(FILES)
 	$(MPREMOTE) connect $(DEVICE) fs mkdir $(BOARD_PATH)/vendor || true
 	$(MPREMOTE) connect $(DEVICE) fs mkdir $(BOARD_PATH)/static || true
 	$(MPREMOTE) connect $(DEVICE) fs mkdir $(BOARD_PATH)/tasks || true
+	$(MPREMOTE) connect $(DEVICE) fs mkdir $(BOARD_PATH)/logs || true
 
 	@for file in $(FILES); do \
 		echo "Uploading $$file..."; \
@@ -65,3 +66,12 @@ flash-clean:
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -r {} +
+
+repl:
+	$(MPREMOTE) connect $(DEVICE) repl
+
+logs:
+	$(MPREMOTE) connect $(DEVICE) run tools/tail_log.py
+
+restart:
+	$(MPREMOTE) connect $(DEVICE) exec "import machine; machine.soft_reset()"
