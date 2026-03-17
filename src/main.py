@@ -22,12 +22,14 @@ from lib.logger import get_logger
 from tasks.memory_monitor import monitor_memory
 import time
 
-time.sleep(2)  # Short delay to allow us to interrupt if needed
-
+# Hardware and task imports
 from hardware import get_sensor_driver, get_relay_driver
 from tasks.sensor_loop import poll_sensor_loop
 from tasks.relay_loop import poll_relay_loop
 import config as _app_config_module
+
+time.sleep(2)  # Short delay to allow us to interrupt if needed
+
 DEBUG_MODE = getattr(_app_config_module, 'DEBUG_MODE', False)
 
 # Get configs

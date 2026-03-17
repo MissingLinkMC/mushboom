@@ -29,7 +29,7 @@ mock_microdot = types.ModuleType('vendor.microdot')
 mock_microdot.Response = MockResponse
 sys.modules['vendor.microdot'] = mock_microdot
 
-import importlib
+import importlib  # noqa: E402
 api_debug = importlib.import_module('src.api_debug')
 
 
@@ -54,7 +54,7 @@ class MockApp:
         return decorator
 
 
-import asyncio as stdlib_asyncio
+import asyncio as stdlib_asyncio  # noqa: E402
 
 
 class TestApiDebugValidation:
@@ -67,7 +67,7 @@ class TestApiDebugValidation:
 
     def test_valid_keys_update_driver_values(self):
         req = MockRequest({"temperature": 25.0, "co2": 800})
-        resp = stdlib_asyncio.run(self.put_handler(req))
+        stdlib_asyncio.run(self.put_handler(req))
         assert self.driver.values["temperature"] == 25.0
         assert self.driver.values["co2"] == 800
 
@@ -93,7 +93,7 @@ class TestApiDebugValidation:
     def test_delete_clears_driver_values(self):
         self.driver.values["temperature"] = 25.0
         req = MockRequest(None)
-        resp = stdlib_asyncio.run(self.delete_handler(req))
+        stdlib_asyncio.run(self.delete_handler(req))
         assert self.driver.values == {}
 
     def test_delete_returns_ok(self):

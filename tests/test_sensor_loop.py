@@ -47,7 +47,7 @@ else:
 mock_config.POLL_INTERVAL_SECONDS = 30
 mock_config.DEBUG_MODE = False
 
-import importlib
+import importlib  # noqa: E402
 sensor_loop = importlib.import_module('src.tasks.sensor_loop')
 
 

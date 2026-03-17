@@ -54,7 +54,7 @@ mock_config.PCT2075_I2C_SCL_PIN_2 = -1
 mock_config.PCT2075_I2C_ADDR_2 = 0x77
 sys.modules['config'] = mock_config
 
-import importlib
+import importlib  # noqa: E402
 hardware = importlib.import_module('src.hardware')
 
 

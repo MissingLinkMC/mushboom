@@ -35,7 +35,7 @@ mock_state = types.SimpleNamespace(
 )
 sys.modules['shared_state'] = types.SimpleNamespace(state=mock_state)
 
-import importlib
+import importlib  # noqa: E402
 relay_loop = importlib.import_module('src.tasks.relay_loop')
 
 
