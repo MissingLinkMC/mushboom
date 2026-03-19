@@ -65,7 +65,8 @@ async def main():
     asyncio.create_task(safe_task("Sensor", lambda: poll_sensor_loop(sensor_driver)))
     asyncio.create_task(safe_task("Control", control_loop))
     asyncio.create_task(safe_task("Relay", lambda: poll_relay_loop(relay_driver)))
-    asyncio.create_task(safe_task("ThingSpeak", thingspeak_loop))
+    if not DEBUG_MODE:
+        asyncio.create_task(safe_task("ThingSpeak", thingspeak_loop))
 
     # Add memory monitoring to track memory usage
     asyncio.create_task(safe_task("Memory Monitor", monitor_memory))
