@@ -12,57 +12,82 @@ After moving thresholds into per-metric card collapses and device modes into per
 
 ## Chosen Approach
 
-**Option B:** Aux temps move into the Temp card; Controls panel replaced with a flat, always-visible Fan Schedule section.
+**Option B:** Aux temps move into the Temp card; Controls panel replaced with a flat, always-visible Fan Schedule card.
 
 ## Changes
 
 ### 1. Aux Sensors → Temp Card
 
-- Add a `<details class="threshold-details">` at the bottom of the Temperature metric card, after the existing Thresholds collapse.
-- Summary text: "Aux Sensors"
-- Body contains the existing S1/S2/S3 sensor bar rows (same markup, reusing `.sensor-row`, `.sensor-bar-track`, `.sensor-bar-fill`, `.sensor-value` classes).
-- **Auto-open behaviour:** In `refresh()`, after updating the aux bars, set `auxDetails.open = hasAux` where `hasAux = t1 !== null || t2 !== null || t3 !== null`. This auto-expands when any aux value arrives and auto-collapses when all are null (e.g. after a debug state clear).
-- Remove the standalone `.sensors` section from the HTML entirely.
+Add a `<details class="threshold-details" id="aux-sensors-details">` at the bottom of the Temperature metric card, after the existing Thresholds collapse. Do **not** include the `open` attribute in the HTML — it starts collapsed.
 
-### 2. Controls Panel → Flat Fan Schedule Section
+- Summary: `<summary class="threshold-summary">Aux Sensors</summary>`
+- Body contains the existing S1/S2/S3 sensor bar rows, reusing `.sensor-row`, `.sensor-bar-track`, `.sensor-bar-fill`, `.sensor-value` classes unchanged. The `id` attributes (`temp1-bar`, `temp1-value`, etc.) are preserved — only the containing element moves.
+- The existing `updateBar()` calls for aux sensors remain unchanged: no threshold indicators, no color coding, same `tempMin`/`tempMax` scale.
 
-- Remove the `<details class="controls-panel">` wrapper and `<div class="controls-body">` entirely.
-- Replace with `<div class="schedule-section">` containing:
-  - A `<div class="schedule-section-heading">Fan Schedule</div>` label.
-  - The existing `#fan-schedule-form` and `.schedule-hint` unchanged.
-- The section is always visible — no collapse.
-- Style `.schedule-section` as a card: same `background: var(--surface)`, `border`, `border-radius`, `padding` as other cards, with `margin: 8px 16px`.
+**Auto-open behaviour:** Inside the `try` block in `refresh()`, after the three aux `updateBar()` calls, add:
+
+```js
+const auxDetails = document.getElementById('aux-sensors-details');
+const hasAux = t1 !== null || t2 !== null || t3 !== null;
+auxDetails.open = hasAux;
+```
+
+This auto-expands when any aux value is non-null and auto-collapses when all are null (e.g. after a debug state clear).
+
+Remove the standalone `.sensors` section from the HTML entirely.
+
+### 2. Controls Panel → Flat Fan Schedule Card
+
+Remove the `<details class="controls-panel">` wrapper and `<div class="controls-body">` entirely. Replace with:
+
+```html
+<div class="schedule-section">
+  <div class="schedule-section-heading">Fan Schedule</div>
+  <!-- existing #fan-schedule-form unchanged -->
+  <!-- existing .schedule-hint unchanged -->
+</div>
+```
+
+The section is always visible — no collapse.
+
+`.schedule-section` is styled as a card matching the metric and device cards:
+- `background: var(--surface)` — this is intentionally the same flat surface as all other cards, replacing the previous two-tone look (controls body used `var(--bg)`, darker than `var(--surface)`).
+- `border: 1px solid var(--border)`
+- `border-radius: 8px`
+- `padding: 12px`
+- `margin: 8px 16px`
+
+`.schedule-section-heading` matches `.threshold-details summary` styling: `color: var(--text-dim)`, `font-size: 0.65em`, `text-transform: uppercase`, `letter-spacing: 0.5px`, `margin-bottom: 8px`.
 
 ### 3. CSS Cleanup
 
 Remove now-unused rules:
-- `.controls-panel`
-- `.controls-panel summary` and pseudo-elements
+- `.controls-panel` and all sub-rules (summary, pseudo-elements, `[open]` variant)
 - `.controls-body`
 - `.controls-section-heading`
-- `.controls-divider`
+- `.controls-divider` (already a dead rule — no `<hr class="controls-divider">` remains in the HTML)
+- `.sensors` and `.sensors-heading` (become dead once the `.sensors` section is removed from HTML)
 
 Add:
-- `.schedule-section` — card-style container for the fan schedule
-- `.schedule-section-heading` — label styled like `.threshold-summary` (muted uppercase)
+- `.schedule-section`
+- `.schedule-section-heading`
 
 ## Final Page Order
 
 1. Navbar
 2. Status row (Online badge + timestamp)
-3. Metric cards: CO₂ · Temperature (with Thresholds + Aux Sensors collapses) · Humidity
+3. Metric cards: CO₂ · Temperature (with Thresholds collapse + Aux Sensors collapse) · Humidity
 4. Device cards: Heater · Fan · Humidifier (each with Mode collapse)
-5. Fan Schedule section (always visible card)
+5. Fan Schedule card (always visible)
 
 ## Out of Scope
 
 - Debug value injection UI on the dashboard — injection is handled via `PUT /api/debug/state` curl calls, which already support `temperature_1`, `temperature_2`, `temperature_3`.
 - Any changes to API, backend, or hardware drivers.
-- Fan Schedule collapse behaviour — it becomes always-visible intentionally.
 
 ## Files Changed
 
 | File | Change |
 |------|--------|
-| `src/static/index.html` | Move aux sensor rows into Temp card; remove `.sensors` section; replace controls panel with `.schedule-section` |
-| `src/static/style.css` | Remove unused controls-panel rules; add `.schedule-section` and `.schedule-section-heading` |
+| `src/static/index.html` | Move aux sensor rows into Temp card `<details>`; remove `.sensors` section; replace controls panel with `.schedule-section` div |
+| `src/static/style.css` | Remove unused rules (controls-panel, controls-body, controls-section-heading, controls-divider, sensors, sensors-heading); add `.schedule-section` and `.schedule-section-heading` |
