@@ -209,6 +209,65 @@ The fan schedule feature allows you to configure periodic fan operation to ensur
 
 **Note:** The schedule takes priority over CO2-based control when active, but CO2-based control will still activate the fan if levels exceed thresholds, even outside of scheduled run times.
 
+## Debug Mode
+
+Debug mode lets you test the full system — web server, control logic, API — without any real sensors or relays attached. All hardware is replaced with software stubs, and a set of extra API endpoints lets you inject mock sensor readings.
+
+### Enabling Debug Mode
+
+Create `src/config_local.py` (gitignored) and set:
+
+```python
+DEBUG_MODE = True
+```
+
+With `DEBUG_MODE = True`:
+- No I2C or GPIO hardware is initialized — safe to run without any peripherals connected
+- ThingSpeak reporting is disabled
+- Extra debug routes are registered under `/api/debug/`
+
+### Injecting Sensor Values
+
+Find the device IP after boot (e.g. via your router, or `make repl` → `import network; sta = network.WLAN(network.STA_IF); print(sta.ifconfig())`), then set `DEVICE_IP` in your shell:
+
+```bash
+export DEVICE_IP=192.168.x.x
+```
+
+Inject values — the control loop reacts within ~35 seconds (30s sensor poll + 5s control tick):
+
+```bash
+curl -X PUT http://$DEVICE_IP/api/debug/state \
+  -H 'Content-Type: application/json' \
+  -d '{"temperature": 21.5, "co2": 850, "relative_humidity": 88.0}'
+```
+
+Read the resulting relay decisions:
+
+```bash
+curl http://$DEVICE_IP/api/metrics
+```
+
+Clear injected values (heater turns OFF immediately as a safety fallback):
+
+```bash
+curl -X DELETE http://$DEVICE_IP/api/debug/state
+```
+
+Valid keys for injection: `temperature`, `co2`, `relative_humidity`, `temperature_1`, `temperature_2`, `temperature_3`.
+
+### Device Commands
+
+| Action | Command |
+|--------|---------|
+| Upload files | `make flash` |
+| Wipe device and re-flash | `make flash-clean` |
+| Soft-reset board | `make restart` |
+| Open REPL | `make repl` |
+| Tail logs (USB) | `make logs` |
+
+> **Note:** `make logs` and `make restart` both open the USB serial port. Stop `make logs` (Ctrl-C) before running `make restart`.
+
 ### Development Commands
 
 ```bash

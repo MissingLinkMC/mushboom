@@ -10,9 +10,7 @@ import machine
 # Core functionality
 from api import app
 import config as app_config
-from tasks.sensor_loop import poll_sensor_loop
 from tasks.control_loop import control_loop
-from tasks.relay_loop import relay_controller
 from tasks.thingspeak_loop import thingspeak_loop
 from lib.reset_reason import get_reset_reason
 
@@ -24,7 +22,15 @@ from lib.logger import get_logger
 from tasks.memory_monitor import monitor_memory
 import time
 
+# Hardware and task imports
+from hardware import get_sensor_driver, get_relay_driver
+from tasks.sensor_loop import poll_sensor_loop
+from tasks.relay_loop import poll_relay_loop
+import config as _app_config_module
+
 time.sleep(2)  # Short delay to allow us to interrupt if needed
+
+DEBUG_MODE = getattr(_app_config_module, 'DEBUG_MODE', False)
 
 # Get configs
 WEB_SERVER_PORT = getattr(app_config, "WEB_SERVER_PORT", 80)
@@ -46,13 +52,21 @@ except Exception as e:
 
 async def main():
     """Main application entrypoint"""
+    sensor_driver = get_sensor_driver()
+    relay_driver = get_relay_driver()
+
+    if DEBUG_MODE:
+        from api_debug import register_debug_routes
+        register_debug_routes(app, sensor_driver)
+
     logger.info("Initializing system tasks...")
 
     # Start core functionality tasks as soon as possible to protect our mushies
-    asyncio.create_task(safe_task("Sensor", poll_sensor_loop))
+    asyncio.create_task(safe_task("Sensor", lambda: poll_sensor_loop(sensor_driver)))
     asyncio.create_task(safe_task("Control", control_loop))
-    asyncio.create_task(safe_task("Relay", relay_controller.relay_loop))
-    asyncio.create_task(safe_task("ThingSpeak", thingspeak_loop))
+    asyncio.create_task(safe_task("Relay", lambda: poll_relay_loop(relay_driver)))
+    if not DEBUG_MODE:
+        asyncio.create_task(safe_task("ThingSpeak", thingspeak_loop))
 
     # Add memory monitoring to track memory usage
     asyncio.create_task(safe_task("Memory Monitor", monitor_memory))

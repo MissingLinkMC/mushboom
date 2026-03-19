@@ -49,6 +49,9 @@ POLL_INTERVAL_SECONDS = 30
 
 QT_POWER_PIN = 7  # Pin for QT port power, set to -1 to disable
 
+# Debug mode — set to True in config_local.py when testing without real hardware
+DEBUG_MODE = False
+
 # Local overrides (gitignored) — copy config_local.example.py to config_local.py
 try:
     from config_local import *  # type: ignore # noqa: F401, F403
