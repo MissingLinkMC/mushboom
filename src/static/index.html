@@ -180,33 +180,25 @@
       </div>
     </div>
 
-    <!-- Controls panel -->
-    <details class="controls-panel">
-      <summary>⚙ Controls</summary>
-      <div class="controls-body">
-
-        <!-- Fan Schedule -->
-        <div>
-          <div class="controls-section-heading">Fan Schedule</div>
-          <form id="fan-schedule-form">
-            <div class="schedule-toggle-row">
-              <input type="checkbox" id="fan-schedule-enabled">
-              <label for="fan-schedule-enabled">Enable scheduled fan run</label>
-            </div>
-            <div class="schedule-inputs-row" id="fan-schedule-row">
-              <span>Run for</span>
-              <input type="number" id="fan-schedule-duration" min="1" step="1">
-              <span>min every</span>
-              <input type="number" id="fan-schedule-interval" min="1" step="1">
-              <span>min</span>
-            </div>
-            <button type="submit" class="btn btn-primary">Save Schedule</button>
-          </form>
-          <div class="schedule-hint">Fan still runs if CO₂ exceeds threshold.</div>
+    <!-- Fan Schedule -->
+    <div class="schedule-section">
+      <div class="schedule-section-heading">Fan Schedule</div>
+      <form id="fan-schedule-form">
+        <div class="schedule-toggle-row">
+          <input type="checkbox" id="fan-schedule-enabled">
+          <label for="fan-schedule-enabled">Enable scheduled fan run</label>
         </div>
-
-      </div>
-    </details>
+        <div class="schedule-inputs-row" id="fan-schedule-row">
+          <span>Run for</span>
+          <input type="number" id="fan-schedule-duration" min="1" step="1">
+          <span>min every</span>
+          <input type="number" id="fan-schedule-interval" min="1" step="1">
+          <span>min</span>
+        </div>
+        <button type="submit" class="btn btn-primary">Save Schedule</button>
+      </form>
+      <div class="schedule-hint">Fan still runs if CO₂ exceeds threshold.</div>
+    </div>
 
   </div><!-- /page -->
 
